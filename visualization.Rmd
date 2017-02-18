@@ -1,0 +1,49 @@
+---
+title: "Visualize Securities Datasets"
+output: html_notebook
+---
+
+## Hige dimensional undirected graph estimation package (huge) has an S&P 500 stocks dataset
+
+```{r}
+library(huge)
+data(stockdata)
+attach(stockdata)
+
+# Each column represents a stock
+D <- length(data[1,])
+
+# Each row contains the prices of a specific time
+len <- length(data[,1])
+prices <- data[,1:D]
+
+# First column is stock symbol
+lab <- stockdata$info[1:D,1]
+
+displayCharts <- function(prices, lab, nrow=3, ncol=4, sleepSecs=4) {
+  Dims=length(prices[1,])
+  for(chartGrp in (1:ceiling(Dims/(nrow*ncol)))) {
+    print(chartGrp)
+    par(mar=c(3.82, 1.82, 1.82, 0.82))
+    par(mfrow=c(nrow, ncol))
+    for(i in 1:(nrow*ncol)) {
+      # j is the jth column in prices
+      j = ((chartGrp-1)*nrow*ncol+i)
+      # if j is with total 
+      if(j <= Dims) {
+        print(paste(j, lab[j]))
+        plot(prices[,j], type='l', xlab=paste(j, lab[j]))
+      }
+    }
+    # Sys.sleep(sleepSecs)
+  }
+}
+
+# Unit test
+displayCharts(prices, lab)
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file).
