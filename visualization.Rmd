@@ -20,17 +20,17 @@ prices <- data[,1:D]
 # First column is stock symbol
 lab <- stockdata$info[1:D,1]
 
-displayCharts <- function(prices, lab, nrow=3, ncol=4, sleepSecs=4) {
-  Dims=length(prices[1,])
-  for(chartGrp in (1:ceiling(Dims/(nrow*ncol)))) {
-    print(chartGrp)
+DisplayCharts <- function(prices, lab, nrow=3, ncol=4, sleepsecs=4) {
+  dims <- length(prices[1,])
+  for(chartgrp in (1:ceiling(dims/(nrow*ncol)))) {
+    print(chartgrp)
     par(mar=c(3.82, 1.82, 1.82, 0.82))
     par(mfrow=c(nrow, ncol))
     for(i in 1:(nrow*ncol)) {
       # j is the jth column in prices
-      j = ((chartGrp-1)*nrow*ncol+i)
-      # if j is with total 
-      if(j <= Dims) {
+      j <- ((chartgrp-1)*nrow*ncol+i)
+      # if j is with total d
+      if(j <= dims) {
         print(paste(j, lab[j]))
         plot(prices[,j], type='l', xlab=paste(j, lab[j]))
       }
@@ -40,10 +40,29 @@ displayCharts <- function(prices, lab, nrow=3, ncol=4, sleepSecs=4) {
 }
 
 # Unit test
-displayCharts(prices, lab)
+DisplayCharts(prices, lab)
 ```
 
+## Adjusting for Stock Splits
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+* When a stock's price has appreciated greatly, splitting the common stock makes the price more affordable
+* Also, it can enhance visibility into the Company's profitability on a per-share basis (e.g. JDSU on Sep, 2016)
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file).
+```{r}
+# Rules to adjust according prices split signals, 
+SplitAdjust <- function(prices, symbol) {
+  len = length(prices)
+  # The last price tick
+  original.finalprice <- prices[len]
+  # j is the second of the pair for comparsion, so it starts from 2
+  for(j in 2:len) {
+    split <- 0  # Initial split is 0
+    if (prices[j-1] >= 1.4*prices[j]) split = +1.5  # 3 for 2 use 3 shares in exchanged for 2 shares
+    if (prices[j-1] >= 1.8*prices[j]) split = +2    # 2 for 1
+    if (prices[j-1] >= 2.9*prices[j]) split = +3    # 3 for 1
+    if (prices[j-1] >= 3.9*prices[j]) split = +4    # 4 for 1
+    if (prices[j=1] >= 4.9*prices[j]) stop(paste(symbol, 'detected more than 4:1 split'))
+  }
+}
+```
+
