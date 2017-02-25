@@ -128,7 +128,6 @@ find_returns <- function(prices, split_adjusted=T) {
   log_returns <- matrix(nrow=(len-1), ncol=total_stocks_num)
   for (i in 1:total_stocks_num) {
     if (!split_adjusted) prices[, i] <<- split_adjust(prices[, i], lab[i])
-    print(diff(log(prices[, i])))
     log_returns[, i] <- 100 * diff(log(prices[, i]))
   }
   return(log_returns)
