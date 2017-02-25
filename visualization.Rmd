@@ -138,7 +138,7 @@ returns <- find_returns(prices, split_adjusted=F)
 returns
 ```
 
-# Plotting mulitple series data in 1 chart
+## Plotting mulitple series data in 1 chart
 
 This chart scales all prices to 1 unit of curreny. This scaling replaces the actual prices with relative prices so that securities returns can be compared.
 
