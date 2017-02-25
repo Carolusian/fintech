@@ -20,27 +20,27 @@ prices <- data[,1:D]
 # First column is stock symbol
 lab <- stockdata$info[1:D,1]
 
-DisplayCharts <- function(prices, lab, nrow=3, ncol=4, sleepsecs=4) {
+display_charts <- function(prices, lab, nrow=3, ncol=4, sleep_secs=4) {
   dims <- length(prices[1,])
-  for(chartgrp in (1:ceiling(dims/(nrow*ncol)))) {
-    print(chartgrp)
+  for(chart_grp in (1:ceiling(dims/(nrow*ncol)))) {
+    print(chart_grp)
     par(mar=c(3.82, 1.82, 1.82, 0.82))
     par(mfrow=c(nrow, ncol))
     for(i in 1:(nrow*ncol)) {
       # j is the jth column in prices
-      j <- ((chartgrp-1)*nrow*ncol+i)
+      j <- ((chart_grp-1)*nrow*ncol+i)
       # if j is with total d
       if(j <= dims) {
         print(paste(j, lab[j]))
         plot(prices[,j], type='l', xlab=paste(j, lab[j]))
       }
     }
-    # Sys.sleep(sleepSecs)
+    Sys.sleep(sleep_secs)
   }
 }
 
 # Unit test
-DisplayCharts(prices, lab)
+display_charts(prices, lab)
 ```
 
 ## Adjusting for Stock Splits
@@ -50,19 +50,137 @@ DisplayCharts(prices, lab)
 
 ```{r}
 # Rules to adjust according prices split signals, 
-SplitAdjust <- function(prices, symbol) {
+split_adjust <- function(prices, symbol) {
   len = length(prices)
   # The last price tick
-  original.finalprice <- prices[len]
+  original_final_price <- prices[len]
   # j is the second of the pair for comparsion, so it starts from 2
   for(j in 2:len) {
     split <- 0  # Initial split is 0
-    if (prices[j-1] >= 1.4*prices[j]) split = +1.5  # 3 for 2 use 3 shares in exchanged for 2 shares
-    if (prices[j-1] >= 1.8*prices[j]) split = +2    # 2 for 1
-    if (prices[j-1] >= 2.9*prices[j]) split = +3    # 3 for 1
-    if (prices[j-1] >= 3.9*prices[j]) split = +4    # 4 for 1
-    if (prices[j=1] >= 4.9*prices[j]) stop(paste(symbol, 'detected more than 4:1 split'))
+    
+    # Rules to determine whether a stock's price is splitted
+    if (prices[j-1] >= 1.4*prices[j]) {
+      split = 1.5  # 3 for 2 use 3 shares in exchanged for 2 shares
+      if (prices[j-1] >= 1.8*prices[j]) split = 2    # 2 for 1
+      if (prices[j-1] >= 2.9*prices[j]) split = 3    # 3 for 1
+      if (prices[j-1] >= 3.9*prices[j]) split = 4    # 4 for 1
+      if (prices[j=1] >= 4.9*prices[j]) stop(paste(symbol, 'detected more than 4:1 split'))
+      print(paste('Split adjusting', symbol, j, split, prices[j-1], prices[j]))
+    }
+    
+    # Rules to determine whether a stock's price is reverse splitted
+    if (prices[j-1] <= prices[j]/1.4) {
+      split = -1.5 
+      if (prices[j-1] <= prices[j]/1.9 && prices[j-1] >= prices[j]/2.1) split = -2
+      if (prices[j-1] <= prices[j]/2.9 && prices[j-1] >= prices[j]/3.1) split = -3
+      if (prices[j-1] <= prices[j]/5.8 && prices[j-1] >= prices[j]/6.2) split = -6
+      if (prices[j-1] <= prices[j]/7.7 && prices[j-1] >= prices[j]/8.3) split = -8
+      if (prices[j-1] <= prices[j]/9.7 && prices[j-1] >= prices[j]/10.3) split = -10
+      if ((split == 0) && (prices[j-1] <= prices[j]/2.9)) stop(paste(symbol, 'detected more than double reverse split'))
+      print(paste('Reverse split adjusting', symbol, j, split, prices[j-1], prices[j])) 
+    }
+    
+    if (split != 0) {
+      # If there is a split, apply the split to prices vector
+      # `j` is the where in a price vector the split incurs
+      for (k in j:len) {
+       if (split > 0) prices[k] = prices[k] * split
+       else prices[k] = prices[k] / abs(split)
+      }
+    }
+  }
+  
+  final_price = prices[len]
+  
+  # Before this step, prices before splits will be kept
+  # After this step, prices before last split will be adjusted
+  return(prices * original_final_price / final_price)
+}
+
+# Unit test
+p <- c(3.0, 3.0, 2.0, 11.88, 5.9, 1.95, 3.9, 3.9, 1.5, .75, 1.00, 1.2, 1.4, 1.8, 2.1, 1.05, 1.3)
+sap <- split_adjust(p, "SYM")
+plot(p, type='l', ylim=c(0, 15)); points(sap, col=4)
+
+# Apply adjust split to stock 'JDSU'
+library(huge)
+data(stockdata)
+attach(stockdata)
+# Each column represents a stock
+total_stocks_num <- length(data[1,])
+# Each row contains the prices of a specific time
+len <- length(data[,1])
+prices <- data[, 1:total_stocks_num]
+# First column is stock symbol
+lab <- stockdata$info[1:total_stocks_num, 1]
+
+idx <- match('JDSU', lab)
+sap <- split_adjust(prices[, idx], 'JDSU')
+plot(prices[, idx], type='l', ylim=c(0, 55), xlab='JDSU'); points(sap, col=4)
+```
+
+## Find log returns for the prices series
+
+```{r}
+find_returns <- function(prices, split_adjusted=T) {
+  len <- dim(prices)[1]
+  total_stocks_num <- dim(prices)[2]
+  log_returns <- matrix(nrow=(len-1), ncol=total_stocks_num)
+  for (i in 1:total_stocks_num) {
+    if (!split_adjusted) prices[, i] <<- split_adjust(prices[, i], lab[i])
+    print(diff(log(prices[, i])))
+    log_returns[, i] <- 100 * diff(log(prices[, i]))
+  }
+  return(log_returns)
+}
+
+returns <- find_returns(prices, split_adjusted=F)
+returns
+```
+
+# Plotting mulitple series data in 1 chart
+
+This chart scales all prices to 1 unit of curreny. This scaling replaces the actual prices with relative prices so that securities returns can be compared.
+
+```{r}
+plot_multi_series <- function(prices, lab, w, total_stocks_num, cc='days', ret=NA, ylim=c(.2, 15), is_alone=T) {
+  if (is_alone) plot.new()
+  
+  # Each stock in the same chart shall have a different color
+  map_color <- function(d) {
+    if (d %% 8 == 7) 1 
+    else if (d == 8) 2
+    else if (d == 15) 3
+    else if (d == 23) 4
+    else d
+  }
+  
+  # Set the margin of the graphical parameters
+  par(mar=c(4, 2.82, 1.82, 1))
+  if (is_alone) par(mfrow=c(1, 1))
+  
+  total <- 0; len <- dim(prices)[1]
+  first <- T; total_stocks_num <- dim(prices)[2]
+  
+  for (d in 1:total_stocks_num) {
+    # Make sure the first prices value of the time series is not NA
+    if(!is.na(prices[1, d]) && !is.na(w[d]) && w[d] > 0) {
+      print(lab[d])
+      total <- total + 1
+      if (first) {
+        # If this is the first plot, use plot function
+        first = F
+        # Every prices divided by prices of the first day, line chart, xlab is displayed in days
+        plot(prices[, d]/prices[1, d], type='l', col=map_color(d), xlab=cc, ylim=ylim)
+      } else {
+        lines(prices[, d]/prices[1, d], type='l', col=map_color(d))
+      }
+    }
   }
 }
+
+# Unit test
+stocks_num_to_draw <- 12
+w <- rep(1/stocks_num_to_draw, stocks_num_to_draw)
 ```
 
