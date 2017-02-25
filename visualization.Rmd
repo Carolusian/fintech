@@ -175,6 +175,10 @@ plot_multi_series <- function(prices, lab, w, total_stocks_num, cc='days', ret=N
       } else {
         lines(prices[, d]/prices[1, d], type='l', col=map_color(d))
       }
+      # cex: character expansion factor to determine font size
+      # len: display the texts at the end of X-axis
+      # prices[len, d]/prices[1, d]: height of the text
+      text(len, (prices[len, d]/prices[1, d]), lab[d], col=map_color(d), cex=.8)
     }
   }
 }
@@ -182,5 +186,6 @@ plot_multi_series <- function(prices, lab, w, total_stocks_num, cc='days', ret=N
 # Unit test
 stocks_num_to_draw <- 12
 w <- rep(1/stocks_num_to_draw, stocks_num_to_draw)
+plot_multi_series(prices, lab, w, stocks_num_to_draw, cc=paste(sum(w > 0), 'stocks'), ret='', ylim=c(.5, 8))
 ```
 
