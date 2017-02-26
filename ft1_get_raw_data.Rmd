@@ -1,0 +1,20 @@
+---
+title: "Get Securites Data from Internet"
+output: html_notebook
+---
+
+## The `tseries` Package
+
+This package has a `get.hist.quote` function
+
+```{r}
+library(tseries)
+get.hist.quote('YHOO', quote='Adj', start='2011-02-09', end='2015-02-09')
+```
+
+## 
+
+```{python}
+
+```
+
