@@ -1,0 +1,49 @@
+---
+title: "Time Series Analysis"
+output: html_notebook
+---
+
+## Rudimentary Knowledge
+
+* ADF test (Augmented Dickey-Fuller Test): `Null Hypothesis` the time ordered set of observations is non-stationary
+* Seasonal means model: expected average temperature for each of the 12 months is given as:
+** μt = β1 for (1, 13, 25..) β2 for (2, 14, 26..) β12 for (12, 24, 36)
+* `~` operation in R is a formula, left of the ~ is the response, right are the explanatory variables
+* Regression is methodologies to predict a response variable
+* OLS (ordinary least squares): Linear Regression is one type of OLS regression. In OLS regression, a quantitative dependent variable is predicted from a weighted sum of predictor variables. See `R in Action by Robert I. Kabacoff` for equation
+* Box-Cox procedure: produce normal distribuated response variable by, e.g. log, 1/(y), sqrt(y)
+* acf: autocorrelation function (if all lag > 0 coeffecients are within the confidence interval range, then it is acceptable)
+
+## Regression Test on Whether `tempdub` Dataset is Stationary 
+
+```{r}
+library(TSA)
+data(tempdub)
+plot(tempdub, col='blue')
+adf.test(tempdub) # p-value: 0.01, rejected non-stationary null hypothesis
+
+month <- season(tempdub) # Create repeated rows with (Jan, Feb ... Dec)
+summary(lm(tempdub ~ month - 1))
+# The model accounts 99.57 percent of all variation
+```
+
+## `hare` Dataset is Less Stable Because of More Factors
+
+```{r}
+library(TSA)
+data(hare)
+plot(hare, col='blue')
+adf.test(hare) # p-value: 0.06, reject stationary alternative hypothesis
+
+# Use Box-Cox procedure to make it stationary
+par(mfrow=c(2, 2))
+BoxCox.ar(hare) 
+# Output of Box-Cox will show that power transform parameter = 0.5
+# According to Power Transformation Table; http://webcache.googleusercontent.com/search?q=cache:zQPZyzK3Z7UJ:www.pt.ntu.edu.tw/hmchai/SAS/SASdescriptive/SASnormality.htm+&cd=8&hl=en&ct=clnk&gl=hk
+# sqrt transformation is proper
+plot(sqrt(hare), col='blue')
+acf(sqrt(hare))
+acf(hare)
+pacf(sqrt(hare))
+```
+
