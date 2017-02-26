@@ -12,9 +12,12 @@ library(tseries)
 get.hist.quote('YHOO', quote='Adj', start='2011-02-09', end='2015-02-09')
 ```
 
-## 
+## The `yahoo-finance` package
+
+Python has a similar package to get data from yahoa finance
 
 ```{python}
-
+from yahoo_finance import Share
+yahoo = Share('YHOO')
+print(yahoo.get_historical('2011-02-09', '2015-02-09')[-1])
 ```
-
