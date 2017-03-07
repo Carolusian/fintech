@@ -13,6 +13,13 @@ output: html_notebook
 * OLS (ordinary least squares): Linear Regression is one type of OLS regression. In OLS regression, a quantitative dependent variable is predicted from a weighted sum of predictor variables. See `R in Action by Robert I. Kabacoff` for equation
 * Box-Cox procedure: produce normal distribuated response variable by, e.g. log, 1/(y), sqrt(y)
 * acf: autocorrelation function (if all lag > 0 coeffecients are within the confidence interval range, then it is acceptable)
+* Autocorrelation (serial correlation): is the correlation of a signal with a deployed copy of itself as a function of deplay. 
+* Time lag: In economics, the inside lag is the amount of time it takes for a government or a central bank to respond to a shock in the economy. It is the delay in implementation of a fiscal policy or monetary policy.
+* The rule of thumb: time series modelling only work with stationary time series.
+* AR(q) model: price(t) = B0 + B1 * price(t-1) .. Bq * price(t-q)
+* MA(1) model: price(t) = u + et - 01 * wt-1
+* AR, MA and ARMA: used to model stationary time series
+* ARIMA: incorporated differencing process to remove the trend to get an stable ARMA process. 6.5 for an summary
 
 ## Regression Test on Whether `tempdub` Dataset is Stationary 
 
@@ -42,8 +49,38 @@ BoxCox.ar(hare)
 # According to Power Transformation Table; http://webcache.googleusercontent.com/search?q=cache:zQPZyzK3Z7UJ:www.pt.ntu.edu.tw/hmchai/SAS/SASdescriptive/SASnormality.htm+&cd=8&hl=en&ct=clnk&gl=hk
 # sqrt transformation is proper
 plot(sqrt(hare), col='blue')
-acf(sqrt(hare))
+acf(sqrt(hare)) # If autocorrelation exist, OLS models do not apply
 acf(hare)
 pacf(sqrt(hare))
+
+
+adf.test(sqrt(hare))  # p = 0.01, reject non-stationary null hypothesis, so it is stationary
+
+
+layout(matrix(c(1,1,2,3), 2, 2, byrow=T))
+plot(armasubsets(y=hare, nar=7, nma=7))
+acf(sqrt(hare))     # Oscilating but exponentially decaying indicating MA component will be of order zero
+pacf(sqrt(hare))    # Lag 3 is borderline significance, so can choose AR(2) or AR(3)
+
+# To understand the ARMA/ARIMA model, see: http://stats.stackexchange.com/questions/167068/simple-example-of-autoregressive-and-moving-average
+m1_hare <- arima(x=sqrt(hare), order=c(2, 0, 0))  # We choose AR(2)
+tsdiag(m1_hare)       # within +/-2, indicates normality; autocorrelation show independance of residuals; Ljung-Box test for independance, P >> 0.05 means independence. 
+
+runs(rstandard(m1_hare))   # Null Hypothesis: independence. If we have too many or too few runs in the series, then it is evidence that the series is not random. Here p = 0.0656 which is barely accept the independance hypothesis
+
+# Since the P-value is not idea. Let us try AR(3)
+m2_hare <- arima(x=sqrt(hare), order=c(3, 0, 0))  
+tsdiag(m2_hare)
+runs(rstandard(m2_hare))  # P = 0.602, which is better then that of AR(2). observed.runs and expected.runs are more close
+
+par(mfrow=c(1, 2))
+hist(rstandard(m2_hare)) # Check the normality of the residuals
+qqnorm(rstandard(m2_hare), col='blue') # For QQ plot, if the residuals were perfectly normal, the dot should be plotted very close to the line.
+qqline(rstandard(m2_hare))
+
+shapiro.test(residuals(m2_hare)) # Shapiro Wilk Test is a test for normality
+
+square <- function (x) { y = x^2 }
+plot(m2_hare, n.ahead = 25, xlab='Year', ylab='Hare Abundance', pch=19, transform=square, col='blue')
 ```
 
