@@ -27,3 +27,23 @@ net
 diff(log(prices))
 ```
 
+## Mean, Variance, Standard Deviation
+
+Mean formula: 
+$$\sum_{i=1}^n xp(x)=\mu$$
+
+```{r}
+# Mean is also know as the `expected value`
+# E(X) = `the weighted average of the values in the range of X`
+
+prob_dice <- rep(1/6, 6) # The probability of rollin a dice (0.1666667 0.1666667 0.1666667 0.1666667 0.1666667 0.1666667)
+sum(prob_dice) # should be 100%
+
+dice <- 1:6 # Possible result of rolling a dice
+samples <- table(sample(dice, size=10000, prob=prob_dice, replace=T)) # Roll a dice 100 times, and build an contingency table of counts
+
+labels <- sprintf("%0.1f%%", samples / sum(samples) * 100)
+bar_samples <- barplot(samples, ylim=c(0, 2000))
+text(x=bar_samples, y=samples+10, label=labels)
+expected_value <- sum(prob_dice * dice) # 3.5
+```
