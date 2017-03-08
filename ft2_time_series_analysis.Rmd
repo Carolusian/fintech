@@ -5,6 +5,7 @@ output: html_notebook
 
 ## Rudimentary Knowledge
 
+* Residual: observed - predicted. If a model fits well, the residual shall follow a normal distribution
 * ADF test (Augmented Dickey-Fuller Test): `Null Hypothesis` the time ordered set of observations is non-stationary
 * Seasonal means model: expected average temperature for each of the 12 months is given as:
 ** μt = β1 for (1, 13, 25..) β2 for (2, 14, 26..) β12 for (12, 24, 36)
