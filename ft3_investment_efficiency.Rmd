@@ -1,0 +1,74 @@
+---
+title: "Measuring Investment Efficiency"
+output: html_notebook
+---
+
+## Rudimentary Knowledge
+
+* Sharpe Ratio: `mean return` above risk-free rate divided by the volatility (measure of risk). It means, given per unit of risk, what is the expected return. Of course, you want to reduce the risk and maxmise you return. Sharpe Ratio of different time interval cannot be compared together
+
+$$\frac{E\{R_p\} - \mu_f}{\sigma_p}$$
+
+```{r}
+sharpe_ratio <- function (mean_return, mu_free, sd) {
+  mean_return - mu_free / sd
+}
+
+prune_by_sharpe <- function (prices, lab, mean_return, sd, thresh_sr, mu_free = 0) {
+  # Plot all sharpe ratios of given candidate set of tickers before they are pruned
+  par(mar=c(4, 4, 1, 1))
+  par(mfrow=c(1, 2))
+  independent_sr <- sharpe_ratio(mean_return, mu_free, thresh_sr) 
+  len <- length(independent_sr)
+  plot(independent_sr, ylab='SR', col=4)
+  plot(sort(independent_sr), ylab='SR', col=4)
+  
+  # Draw a line according to given x, y
+  lines(1:len, rep(thresh_sr, len))
+  
+  # Filter out candidates whose SR less than thresh_sr
+  independent_high_sr <- (independent_sr > thresh_sr) # The result is a TRUE/FALSE vector
+  
+  # cleanup NAs
+  for (d in 1:length(independent_high_sr))
+    if (is.na(independent_high_sr[d]))
+      independent_high_sr <- F
+  
+  len <- dim(prices)[1] # how many rows           1258 for huge stockdata
+  wid <- dim(prices)[2] # how many stock tickers  452  for huge stockdata: 452 S&P 500 stock tickers
+  smaller_size <- sum(independent_high_sr) # The size of candidate kept
+  new_prices <- matrix(rep(0, len * smaller_size), nrow=len, ncol=smaller_size) # A matrix to construct new price matrix of the candidate stocks kept, row count is still len, be column count reduced
+  new_label <- vector(length = smaller_size)
+  e <- 1
+  for (d in 1:wid) {
+    if (independent_high_sr[d]) {
+      print(paste('e', e))
+      new_prices[, e] <- prices[, d]
+      new_label[e] <- lab[d]
+      e <- e + 1
+    }
+  }
+  
+  print('Completed Sharpe pruning')
+  list(new_prices, new_label, independent_sr)
+}
+
+
+library(huge)
+data("stockdata")
+source('common.R')
+dimensions <- length(stockdata$data[1, ])
+prices <- stockdata$data[, 1:dimensions]
+labels <- stockdata$info[1:dimensions, 1]
+returns <- find_returns(prices)
+
+res <- find_covariance_matrix(returns)
+meanv <- res[[1]]
+cov_mat <- res[[2]]
+diag_cov_mat <- res[[3]]
+sd <- res[[4]]
+
+res <- prune_by_sharpe(prices, labels, meanv, sd, .035) # Find sharpe ratio greater than .035
+res[[2]] # Print the stocks kept
+```
+
