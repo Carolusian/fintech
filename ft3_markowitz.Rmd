@@ -1,0 +1,20 @@
+---
+title: "Markowitz Mean-Variance Model"
+output: html_notebook
+---
+
+## Portfolio of Two Risky Assets
+
+* `Portfolio`: the idea is to place a set of securities into a basket with weights representing amount of investment in each
+* `Variance`: representing the volatility or the risky. So we are interested in how to minimize the risk. Below is the formula, where a/b are investment weights and X/Y are two investment returns:
+
+> `Var(aX + bY) = E(aX + bY)^2 - E^2 (aX + bY) = a^2 Var(X) + b^2 Var(Y) + 2abCov(X, Y)`
+
+```{r}
+# Sample: how to find minimum variance of a portfolio.
+## Suppose 
+
+# Make up the parameters
+mu_d
+```
+
