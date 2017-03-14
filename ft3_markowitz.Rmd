@@ -15,6 +15,48 @@ output: html_notebook
 ## Suppose 
 
 # Make up the parameters
-mu_d
+mu_d = .05 # debt has less return than equity
+mu_e = .12
+sigma_e = .30 # but equity has larger risk
+sigma_d = .20
+sigma_de = .003
+w_d = seq(0, 1, .01) # generate 100 different weight combinations
+mu_p = vector(length=length(w_d))
+sigma_p = vector(length=length(w_d))
+sr_p = vector(length=length(w_d))
+
+for (u in 1:length(w_d)) {
+  mu_p[u] = mu_d * w_d[u] + mu_e * (1 - w_d[u])
+  sigma_p[u] = w_d[u]^2 * sigma_d^2 + 2 * w_d[u] * (1 - w_d[u]) * sigma_de + (1-w_d[u])^2 * sigma_e^2
+  sr_p[u] = mu_p[u] / sigma_p[u]
+}
+
+
+##################################
+# Portfolio with minimum risk
+##################################
+
+par(mfrow=c(1, 2))
+plot(sigma_p, w_d, type='l', ylab='w_d', col=6)
+min_var_p_index = sigma_p == min(sigma_p) # get the minimum value of the portfolio
+w_d[min_var_p_index]                      # weight of debt should be 0.7 to get the least risk
+points(sigma_p[min_var_p_index], w_d[min_var_p_index]) # draw the point of minimum variance
+text(sigma_p[min_var_p_index] + .03, w_d[min_var_p_index], paste('<-(', sigma_p[min_var_p_index], ',', w_d[min_var_p_index], ')'), cex=.75)
+
+#####################################
+# Plot risk as a function of return
+#####################################
+
+plot(sigma_p, mu_p, type='l', ylab='mu_p', col=2)
+points(sigma_p[min_var_p_index], mu_p[min_var_p_index])
+text(sigma_p[min_var_p_index] + 0.03, mu_p[min_var_p_index], paste('<-(', sigma_p[min_var_p_index], ',', mu_p[min_var_p_index], ')'), cex=.75) 
+
+#####################################
+# Portfolio with optimal sharpe ratio
+#####################################
+
+optimal_p_index = sr_p == max(sr_p)
+mu_p[optimal_p_index]
+points(sigma_p[optimal_p_index], mu_p[optimal_p_index])
 ```
 
