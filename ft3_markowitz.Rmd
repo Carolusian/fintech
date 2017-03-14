@@ -1,6 +1,8 @@
 ---
 title: "Markowitz Mean-Variance Model"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
 ## Portfolio of Two Risky Assets
@@ -58,5 +60,11 @@ text(sigma_p[min_var_p_index] + 0.03, mu_p[min_var_p_index], paste('<-(', sigma_
 optimal_p_index = sr_p == max(sr_p)
 mu_p[optimal_p_index]
 points(sigma_p[optimal_p_index], mu_p[optimal_p_index])
+text(sigma_p[optimal_p_index] + 0.03, mu_p[optimal_p_index], paste('<-(', sigma_p[optimal_p_index], ',', mu_p[optimal_p_index], ')'), cex=.75) 
 ```
+### Summary
+
+1. The efficient frontier is the entire cure of the rightmost plot
+2. The minimum variance portfolio has a return and variance is the lower of the two selected points
+3. The tangency portfolio which has the best sharpe ratio is the upper of the two selected points
 
