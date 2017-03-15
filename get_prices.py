@@ -1,29 +1,3 @@
----
-title: "Get Securites Data from Internet"
-output: html_notebook
----
-
-## The `tseries` Package
-
-This package has a `get.hist.quote` function
-
-```{r}
-library(tseries)
-get.hist.quote('YHOO', quote='Adj', start='2011-02-09', end='2015-02-09')
-```
-
-## The `yahoo-finance` package
-
-Python has a similar package to get data from yahoa finance
-
-```{python}
-from yahoo_finance import Share
-yahoo = Share('YHOO')
-print(yahoo.get_historical('2011-02-09', '2015-02-09')[-1])
-```
-## Import Data from Internet Using Python
-
-```{python}
 import os
 import pandas as pd
 import gevent
@@ -70,5 +44,4 @@ def get_prices(symbols, start, end, folder_name='hk'):
     gevent.joinall(jobs)
 
 symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), 'hk_securities.csv'))
-get_prices(symbols, '2010-01-01', datetime.now().strftime('%Y-%m-%d'))
-```
+get_prices(symbols, '2014-01-01', datetime.now().strftime('%Y-%m-%d'))
