@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import gevent
+import threading
 from datetime import datetime
 from yahoo_finance import Share
 
@@ -25,23 +25,41 @@ def create_dirs(dir):
     return main_dir
 
 
-def get_prices(symbols, start, end, folder_name='hk'):
-    cache_dir = create_dirs(folder_name)
+class StockData(threading.Thread):
+    def __init__(self, sym, start_date):
+        self.sym = sym
+        self.start_date = start_date
+        self.end_date = datetime.now().strftime('%Y-%m-%d')
+        self.folder_name = 'hk'
+        threading.Thread.__init__(self)
 
-    def get_prices_for(sym):
-        stock_handler = Share(sym)
+    def run(self):
+        print('# start getting data for %s' % self.sym)
+        self.get_prices()
+
+    def get_prices(self):
+        cache_dir = create_dirs(self.folder_name)
+
+        stock_handler = Share(self.sym)
         try:
-            print('# Getting data for {}...'.format(sym))
-            data = stock_handler.get_historical(start, end)
+            data = stock_handler.get_historical(self.start_date, self.end_date)
             df = pd.DataFrame.from_dict(data)
-            df.to_csv(os.path.join(cache_dir, sym))
-            return sym, data
-        except:
-            print('# Error in downloading {}'.format(sym))
+            df.to_csv(os.path.join(cache_dir, self.sym))
+            return self.sym, data
+        except Exception:
+            print('# Error in downloading {}'.format(self.sym))
             return None
 
-    jobs = [gevent.spawn(get_prices_for, sym) for sym in symbols]
-    gevent.joinall(jobs)
-
 symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), 'hk_securities.csv'))
-get_prices(symbols, '2014-01-01', datetime.now().strftime('%Y-%m-%d'))
+
+# Break symbols in buckets in size of 10 each
+# Then download stockdata with multi-threading
+for i in range(0, len(symbols), 10):
+    threads = []
+    for j in range(i, i+10):
+        thread = StockData(symbols[j], '2012-01-01')
+        thread.start()
+        threads.append(thread)
+
+    for t in threads:
+        t.join()
