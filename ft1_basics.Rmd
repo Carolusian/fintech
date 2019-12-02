@@ -20,11 +20,35 @@ gross
 net <- prices[2]/ prices[1] - 1
 net
 
-# Log return
 # Formula:
 # Rlog(t) = log(1 + r(1)) = log(S(t) / S(t-1)) = log(S(t)) - log(S(t-1))
 # You may need to know the logarithm rules (product rule, power rule, quotient rule, etc), see: https://www.google.com.hk/search?q=logarithm+rules&oq=logarithm+rules&aqs=chrome..69i57j0l5.4676j0j7&sourceid=chrome&ie=UTF-8
 diff(log(prices))
+```
+
+The reason that we use Log Return: 
+* A linear price scale is plotted so that there is an equal distance between the prices；
+* A logarithmic price scala is plotted in such way that two equal percent changes are plotted as the same vertical distance;
+
+See: http://www.investopedia.com/ask/answers/05/logvslinear.asp
+
+Suppose your earning increase by 10 times every year:
+
+```{r}
+earnings = c(1, 10, 100, 1000, 10000)
+df <- data.frame(earnings)
+df$log_earnings <- log10(earnings)
+
+par(mar = c(5,5,2,5))
+with(df, plot(earnings, type='l', col='red3',
+              ylab='earning'))
+par(new=T)
+with(df, plot(log_earnings, type='l', axes=F, xlab=NA, ylab=NA, col='blue3'))
+axis(side=4)
+mtext(side=4, line=3, 'magnification')
+legend("topleft", legend = c('earnings', 'magnification'),
+       col=c('red3', 'blue3'),
+       lty=c(1,1))
 ```
 
 ## Mean, Variance, Standard Deviation
