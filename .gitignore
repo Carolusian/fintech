@@ -17,6 +17,7 @@
 .Rproj.user/
 
 # produced vignettes
+.DS_Store
 *.html
 vignettes/*.html
 vignettes/*.pdf
