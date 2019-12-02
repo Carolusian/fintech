@@ -4,6 +4,9 @@ output:
   html_document: default
   html_notebook: default
 ---
+## Basic Concepts
+
+* Linear Programming and Quadratic Programming: https://wenku.baidu.com/view/72f1d6ad856a561253d36f1f.html
 
 ## Portfolio of Two Risky Assets
 
@@ -67,4 +70,8 @@ text(sigma_p[optimal_p_index] + 0.03, mu_p[optimal_p_index], paste('<-(', sigma_
 1. The efficient frontier is the entire cure of the rightmost plot
 2. The minimum variance portfolio has a return and variance is the lower of the two selected points
 3. The tangency portfolio which has the best sharpe ratio is the upper of the two selected points
+
+## Quadratic Programming
+
+
 

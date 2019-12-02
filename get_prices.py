@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 import threading
+import yfinance as yf
 from datetime import datetime
-from yahoo_finance import Share
 
 
 def get_hk_stock_symbols(file_path):
@@ -40,9 +40,9 @@ class StockData(threading.Thread):
     def get_prices(self):
         cache_dir = create_dirs(self.folder_name)
 
-        stock_handler = Share(self.sym)
+        stock_handler = yf.Ticker(self.sym)
         try:
-            data = stock_handler.get_historical(self.start_date, self.end_date)
+            data = stock_handler.history(period='max')
             df = pd.DataFrame.from_dict(data)
             df.to_csv(os.path.join(cache_dir, self.sym))
             return self.sym, data
@@ -57,7 +57,7 @@ symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), 'hk_securities.csv'))
 for i in range(0, len(symbols), 10):
     threads = []
     for j in range(i, i+10):
-        thread = StockData(symbols[j], '2012-01-01')
+        thread = StockData(symbols[j], '2017-01-01')
         thread.start()
         threads.append(thread)
 

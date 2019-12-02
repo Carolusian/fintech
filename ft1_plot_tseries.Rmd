@@ -188,3 +188,21 @@ w <- rep(1/stocks_num_to_draw, stocks_num_to_draw)
 plot_multi_series(prices, lab, w, stocks_num_to_draw, cc=paste(sum(w > 0), 'stocks'), ret='', ylim=c(.5, 8))
 ```
 
+```{r}
+home_dir <- path.expand('~')
+stock_dir <- paste(home_dir,'/stock_data/hk/', sep='')
+stock_files <- list.files(stock_dir)
+# stock_dfs <- list(length=length(stock_files))
+
+for (i in 1:length(stock_files)) {
+  print(stock_files[i])
+  stock_df <- read.csv(paste(stock_dir, stock_files[i], sep=''))   
+}
+
+df <- read.csv(paste(stock_dir, '0700.HK', sep=''))
+df$Adj_Close
+i
+df$Date
+plot(rev(df$Adj_Close), type='l')
+max(df$Close)
+```
