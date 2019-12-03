@@ -9,7 +9,7 @@ This package has a `get.hist.quote` function
 
 ```{r}
 library(tseries)
-get.hist.quote('YHOO', quote='Adj', start='2011-02-09', end='2015-02-09')
+get.hist.quote(instrument = 'GOOG', quote='Adj', start='2011-02-09', end='2015-02-09')
 ```
 
 ## The `yahoo-finance` package
@@ -17,16 +17,15 @@ get.hist.quote('YHOO', quote='Adj', start='2011-02-09', end='2015-02-09')
 Python has a similar package to get data from yahoa finance
 
 ```{python}
-from yahoo_finance import Share
-yahoo = Share('YHOO')
-print(yahoo.get_historical('2011-02-09', '2015-02-09')[-1])
+import yfinance as yf
+yahoo = yf.Ticker('MSFT')
+print(yahoo.history('2011-02-09', '2015-02-09')[-1])
 ```
 ## Import Data from Internet Using Python
 
 ```{python}
 import os
 import pandas as pd
-import gevent
 from datetime import datetime
 from yahoo_finance import Share
 

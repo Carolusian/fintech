@@ -6,13 +6,9 @@ from datetime import datetime
 
 
 def get_hk_stock_symbols(file_path):
-    df = pd.read_csv(file_path, header=None,
-                     names=['id', 'sym', 'name_zh', 'name_cn'],
-                     dtype={
-                         'sym': str
-                     })
-    df = df[df['sym'].str.startswith('0')]
-    df['sym'] = df['sym'].str.extract('(?P<digital>[\d]{4}$)', expand=False)
+    df = pd.read_csv(file_path, skiprows=2, dtype = {'Stock Code': str})
+    df = df[df['Category'] == 'Equity']
+    df['sym'] = df['Stock Code'].str.extract('(?P<digital>[\d]{4}$)', expand=False)
     df['sym'] = df['sym'].astype(str) + '.HK'
     return df['sym'].tolist()
 
@@ -44,19 +40,20 @@ class StockData(threading.Thread):
         try:
             data = stock_handler.history(period='max')
             df = pd.DataFrame.from_dict(data)
-            df.to_csv(os.path.join(cache_dir, self.sym))
+            df.to_csv(os.path.join(cache_dir, self.sym + '.csv'))
             return self.sym, data
         except Exception:
             print('# Error in downloading {}'.format(self.sym))
             return None
 
-symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), 'hk_securities.csv'))
+symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), '2019-12-03_FullListOfSecuritiesHK.csv'))
 
 # Break symbols in buckets in size of 10 each
 # Then download stockdata with multi-threading
 for i in range(0, len(symbols), 10):
     threads = []
-    for j in range(i, i+10):
+    end = i + 10 if i + 10 < len(symbols) else len(symbols)
+    for j in range(i, end):
         thread = StockData(symbols[j], '2017-01-01')
         thread.start()
         threads.append(thread)
