@@ -4,6 +4,8 @@ import logging
 import scrapy
 import pandas as pd
 
+from aastocks import utils
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,16 +30,11 @@ class HsiSpider(scrapy.Spider):
     def parse(self, response):
         index_abbr = response.css('div.tabTS div#cp_ucTabSystem_pHeader b::text').get()
         index_name = response.css('div.tabS2 h1.newsHeader::text').get().split('-')[-1].strip()
-        df = pd.read_html(response.css('table#tbTS').get())[0]
-        df.columns = df.columns.str.replace('▼', '')
-        df.columns = df.columns.str.replace('▲', '')
-        df.columns = df.columns.str.replace(' ', '')
 
-        df['Name/Symbol'] = df['Name/Symbol'].str.partition('.HK').iloc[:,0] + '.HK'
-        df[['Name', 'Symbol']] = df['Name/Symbol'].str.rsplit(' ', expand=True, n=1)
+        html = response.css('table#tbTS').get()
+        df = utils.stock_htmltable_to_df(html)
         df['IndexAbbreviation'] = index_abbr
         df['IndexName'] = index_name
 
         os.makedirs('data/hsi', exist_ok=True)
-
-        df[['Name', 'Symbol', 'IndexAbbreviation', 'IndexName']].to_csv('data/hsi/%s.csv' % index_abbr)
+        df[['Symbol', 'Name', 'IndexAbbreviation', 'IndexName']].to_csv('data/hsi/%s.csv' % index_abbr)
