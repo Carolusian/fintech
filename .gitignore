@@ -22,3 +22,7 @@
 *.html
 vignettes/*.html
 vignettes/*.pdf
+
+
+.ipynb_checkpoints/
+data/

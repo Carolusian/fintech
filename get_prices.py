@@ -3,6 +3,7 @@ import pandas as pd
 import threading
 import yfinance as yf
 from datetime import datetime
+from yahoofinancials import YahooFinancials
 
 
 def get_hk_stock_symbols(file_path):
@@ -53,10 +54,20 @@ symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), '2019-12-03_FullListOfS
 for i in range(0, len(symbols), 10):
     threads = []
     end = i + 10 if i + 10 < len(symbols) else len(symbols)
-    for j in range(i, end):
-        thread = StockData(symbols[j], '2017-01-01')
-        thread.start()
-        threads.append(thread)
-
-    for t in threads:
-        t.join()
+    
+    # for j in range(i, end):
+    #     thread = StockData(symbols[j], '2017-01-01')
+    #     thread.start()
+    #     threads.append(thread)
+# 
+    # for t in threads:
+    #     t.join()
+    
+    sym_list = symbols[i:i+10]
+    yf_handler = YahooFinancials(sym_list)
+    data = yf_handler.get_summary_data()
+    df = pd.DataFrame.from_dict(data)
+    print(df)
+    
+    cache_dir = create_dirs('hk-summaries')
+    df.to_csv(os.path.join(cache_dir, str(i) + '.summary.csv'))

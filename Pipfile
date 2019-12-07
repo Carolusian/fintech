@@ -8,6 +8,9 @@ verify_ssl = true
 [packages]
 yfinance = "*"
 pandas = "*"
+jupyterlab = "*"
+yahoofinancials = "*"
+scrapy = "*"
 
 [requires]
 python_version = "3.8"
