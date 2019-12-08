@@ -37,4 +37,4 @@ class HsiSpider(scrapy.Spider):
         df['IndexName'] = index_name
 
         os.makedirs('data/hsi', exist_ok=True)
-        df[['Symbol', 'Name', 'IndexAbbreviation', 'IndexName']].to_csv('data/hsi/%s.csv' % index_abbr)
+        df[['Symbol', 'Name', 'IndexAbbreviation', 'IndexName']].to_csv('data/hsi/%s.csv' % index_abbr, index=False)

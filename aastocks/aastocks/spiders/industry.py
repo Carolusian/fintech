@@ -34,4 +34,4 @@ class IndustrySpider(scrapy.Spider):
         df['Sector'] = sector_name
 
         os.makedirs('data/industry', exist_ok=True)
-        df[['Symbol', 'Name', 'IndustrySymbol', 'Industry', 'Sector']].to_csv('data/industry/%s.csv' % industry_symbol)
+        df[['Symbol', 'Name', 'IndustrySymbol', 'Industry', 'Sector']].to_csv('data/industry/%s.csv' % industry_symbol, index=False)
