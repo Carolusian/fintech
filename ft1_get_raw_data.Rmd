@@ -71,3 +71,26 @@ def get_prices(symbols, start, end, folder_name='hk'):
 symbols = get_hk_stock_symbols(os.path.join(os.getcwd(), 'hk_securities.csv'))
 get_prices(symbols, '2010-01-01', datetime.now().strftime('%Y-%m-%d'))
 ```
+
+## Concat all stock prices data into a single csv file
+
+```{r}
+library(tidyverse)
+library(readr)
+library(purrr)
+library(stringr)
+
+read_ticker_csv <- function (fpath) {
+    ticker_symbol <- str_replace(basename(fpath), '.csv', '')
+    read_csv(fpath) %>%
+        mutate(Symbol = ticker_symbol) %>%
+        select(Symbol, everything())
+}
+
+all_tickers <- 
+    list.files('~/stock_data/hk/', pattern = '*.csv', full.names = TRUE) %>%
+    map(read_ticker_csv) %>%
+    reduce(rbind)
+
+write_csv(all_tickers, path = '~/stock_data/2019-12_hk_stock_prices.csv')
+```
