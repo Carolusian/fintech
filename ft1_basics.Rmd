@@ -71,3 +71,33 @@ bar_samples <- barplot(samples, ylim=c(0, 2000))
 text(x=bar_samples, y=samples+10, label=labels)
 expected_value <- sum(prob_dice * dice) # 3.5
 ```
+
+## How to calculate cumulative return of client portfolio
+
+```{r}
+library(pacman)
+p_load(tidyverse)
+
+dates <- c('2023-07-03', '2023-07-04', '2023-07-05', '2023-07-06', '2023-07-07')
+cash_transactions <- c(1000, 0, 2540, -1540, 0)
+asset_market_value <- c(1000, 998.23, 3552.63, 2015.42, 2053.87)
+
+
+df <- tibble(date = dates, 
+             cash_tx = cash_transactions, 
+             market_val = asset_market_value)
+
+log_ret <- diff(log(asset_market_value - cash_transactions))
+log_ret
+cum_log_ret <- cumsum(log_ret)
+exp(cum_log_ret) - 1
+
+df <- df %>% 
+  mutate(market_val_adj = market_val - cash_tx) %>% 
+  mutate(log_ret = log(market_val_adj) - log(lag(market_val, 1))) %>%
+  mutate(log_ret = replace_na(log_ret, 0)) %>%
+  mutate(cum_log_ret = cumsum(log_ret),
+         cum_ret = exp(cum_log_ret) - 1)
+           
+df
+```
